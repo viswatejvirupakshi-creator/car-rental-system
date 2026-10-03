@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveEase - Car Rental System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- AUTH SECTION STYLES --- */
+        #auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 1rem;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: -2px;
+        }
+
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .auth-form.active {
+            display: flex;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, select {
+            padding: 0.65rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid var(--primary);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-logout {
+            background-color: #334155;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-logout:hover {
+            background-color: #475569;
+        }
+
+        /* --- APPLICATION DASHBOARD STYLES --- */
+        #app-container {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .user-profile-badge {
+            font-size: 0.85rem;
+            background: #1e293b;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Controls / Search Bar */
+        .controls-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        /* Settings Card Style */
+        .settings-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+        }
+
+        .settings-card h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-img {
+            height: 180px;
+            width: 100%;
+            object-fit: cover;
+            background-color: #eee;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-specs {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .card-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Table Style */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-confirmed { background: #dcfce7; color: #15803d; }
+        .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+        .badge-available { background: #e0f2fe; color: #0369a1; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .price-summary {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-row.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.5rem;
+            margin-bottom: 0;
+        }
+
+        .hint-text {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: -0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SECTION 1: AUTHENTICATION -->
+    <div id="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🚗 DriveEase</h1>
+                <p>Book your perfect ride in minutes</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" required placeholder="user@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <div class="hint-text">
+                    💡 <b>Demo Tip:</b> Log in with email ending in <code>@admin.com</code> for Admin Panel access!
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <form id="signup-form" class="auth-form" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signup-email" required placeholder="user@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="signup-role">
+                        <option value="Customer">Customer</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECTION 2: APPLICATION DASHBOARD -->
+    <div id="app-container">
+        <header>
+            <div class="logo">🚗 DriveEase</div>
+            <div class="user-nav">
+                <div class="nav-links">
+                    <button class="nav-btn active" id="btn-nav-browse" onclick="switchView('customer-view', event)">Browse Cars</button>
+                    <button class="nav-btn" id="btn-nav-bookings" onclick="switchView('bookings-view', event)">My Bookings</button>
+                    <button class="nav-btn" id="admin-nav-item" style="display: none;" onclick="switchView('admin-view', event)">Admin Panel</button>
+                    <button class="nav-btn" id="btn-nav-settings" onclick="switchView('settings-view', event)">Settings</button>
+                </div>
+                <div class="user-profile-badge">
+                    👤 <span id="current-user-display">User</span>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- View 1: Vehicle Catalog -->
+            <section id="customer-view" class="view-section active">
+                <div class="controls-card">
+                    <div class="form-group">
+                        <label>Search Make / Model</label>
+                        <input type="text" id="search-input" placeholder="e.g. Toyota" oninput="filterCars()">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="category-filter" onchange="filterCars()">
+                            <option value="All">All Categories</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Luxury">Luxury</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid" id="car-list"></div>
+            </section>
+
+            <!-- View 2: User Reservations -->
+            <section id="bookings-view" class="view-section">
+                <h2>Your Reservations</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Vehicle</th>
+                            <th>Dates</th>
+                            <th>Total Cost</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-list"></tbody>
+                </table>
+            </section>
+
+            <!-- View 3: Admin Fleet Panel -->
+            <section id="admin-view" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Vehicle Fleet Management</h2>
+                    <button class="btn" style="width: auto;" onclick="openAddCarModal()">+ Add New Vehicle</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Vehicle</th>
+                            <th>Category</th>
+                            <th>Daily Rate</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-fleet-list"></tbody>
+                </table>
+            </section>
+
+            <!-- View 4: Account Settings -->
+            <section id="settings-view" class="view-section">
+                <h2 style="margin-bottom: 1.5rem;">Account & App Settings</h2>
+                
+                <div class="settings-card">
+                    <h3>Profile Details</h3>
+                    <form onsubmit="handleSaveProfile(event)">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Full Name</label>
+                            <input type="text" id="setting-name" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label>Email Address</label>
+                            <input type="email" id="setting-email" required>
+                        </div>
+                        <button type="submit" class="btn" style="width: auto;">Save Profile Changes</button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Preferences & Regional</h3>
+                    <form onsubmit="handleSavePreferences(event)">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Currency Symbol</label>
+                            <select id="setting-currency">
+                                <option value="$">USD ($)</option>
+                                <option value="€">EUR (€)</option>
+                                <option value="£">GBP (£)</option>
+                                <option value="₹">INR (₹)</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group" style="margin-bottom: 1.5rem;">
+                            <input type="checkbox" id="setting-email-notif" checked>
+                            <label for="setting-email-notif">Receive booking notifications & updates via email</label>
+                        </div>
+                        <button type="submit" class="btn" style="width: auto;">Save Preferences</button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Change Password</h3>
+                    <form onsubmit="handleChangePassword(event)">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Current Password</label>
+                            <input type="password" required placeholder="••••••••">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label>New Password</label>
+                            <input type="password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn" style="width: auto;">Update Password</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-backdrop" id="booking-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-car-title">Book Vehicle</h3>
+                <button class="close-btn" onclick="closeModal('booking-modal')">&times;</button>
+            </div>
+            <form id="booking-form" onsubmit="handleBookingSubmit(event)">
+                <input type="hidden" id="booking-car-id">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Pick-up Date</label>
+                    <input type="date" id="start-date" required onchange="calculatePrice()">
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Return Date</label>
+                    <input type="date" id="end-date" required onchange="calculatePrice()">
+                </div>
+
+                <div class="price-summary">
+                    <div class="price-row">
+                        <span>Daily Rate:</span>
+                        <span id="summary-rate">$0</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Duration:</span>
+                        <span id="summary-days">0 days</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total Price:</span>
+                        <span id="summary-total">$0</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Confirm & Pay</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div class="modal-backdrop" id="car-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New Vehicle</h3>
+                <button class="close-btn" onclick="closeModal('car-modal')">&times;</button>
+            </div>
+            <form id="car-form" onsubmit="handleAddCarSubmit(event)">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Make & Model</label>
+                    <input type="text" id="car-name" required placeholder="e.g. Honda Civic">
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Category</label>
+                    <select id="car-category" required>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Luxury">Luxury</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Daily Rate</label>
+                    <input type="number" id="car-price" min="1" required placeholder="50">
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Image URL</label>
+                    <input type="url" id="car-image" required placeholder="https://images.unsplash.com/...">
+                </div>
+                <button type="submit" class="btn">Add Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let selectedCurrency = "$";
+
+        // Expanded Fleet Array with 10 vehicles
+        let vehicles = [
+            { id: 1, name: "Toyota Camry", category: "Sedan", price: 45, image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 2, name: "Ford Explorer", category: "SUV", price: 80, image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 3, name: "BMW 5 Series", category: "Luxury", price: 120, image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 4, name: "Honda Civic", category: "Sedan", price: 40, image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 5, name: "Jeep Grand Cherokee", category: "SUV", price: 90, image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 6, name: "Mercedes-Benz E-Class", category: "Luxury", price: 135, image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 7, name: "Tesla Model 3", category: "Sedan", price: 75, image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 8, name: "Range Rover Sport", category: "SUV", price: 150, image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=600&q=80", status: "Available" },
+            { id: 9, name: "Chevrolet Tahoe", category: "SUV", price: 95, image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80", status: "Available" }
+        ];
+
+        let bookings = [
+            { id: "BK-1001", userEmail: "john@example.com", carName: "Toyota Camry", dates: "2026-10-01 to 2026-10-04", total: 135, currency: "$", status: "Confirmed" }
+        ];
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('signup-form').classList.add('active');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const role = email.endsWith("@admin.com") ? "Admin" : "Customer";
+            const name = email.split("@")[0];
+
+            currentUser = { email, name, role };
+            initApp();
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById("signup-name").value;
+            const email = document.getElementById("signup-email").value;
+            const role = document.getElementById("signup-role").value;
+
+            currentUser = { email, name, role };
+            initApp();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById("app-container").style.display = "none";
+            document.getElementById("auth-container").style.display = "flex";
+            document.getElementById("login-form").reset();
+            document.getElementById("signup-form").reset();
+        }
+
+        function initApp() {
+            document.getElementById("auth-container").style.display = "none";
+            document.getElementById("app-container").style.display = "flex";
+
+            document.getElementById("current-user-display").innerText = `${currentUser.name} (${currentUser.role})`;
+            document.getElementById("setting-name").value = currentUser.name;
+            document.getElementById("setting-email").value = currentUser.email;
+
+            const adminNavBtn = document.getElementById("admin-nav-item");
+            if (currentUser.role === "Admin") {
+                adminNavBtn.style.display = "inline-block";
+            } else {
+                adminNavBtn.style.display = "none";
+            }
+
+            renderCars(vehicles);
+            renderBookings();
+            renderAdminFleet();
+            setMinDates();
+
+            switchView('customer-view');
+        }
+
+        function switchView(viewId, event) {
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            
+            if (event) {
+                event.target.classList.add('active');
+            } else {
+                const navBtnMap = {
+                    'customer-view': 'btn-nav-browse',
+                    'bookings-view': 'btn-nav-bookings',
+                    'admin-view': 'admin-nav-item',
+                    'settings-view': 'btn-nav-settings'
+                };
+                if (navBtnMap[viewId]) {
+                    document.getElementById(navBtnMap[viewId]).classList.add('active');
+                }
+            }
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            currentUser.name = document.getElementById("setting-name").value;
+            currentUser.email = document.getElementById("setting-email").value;
+            document.getElementById("current-user-display").innerText = `${currentUser.name} (${currentUser.role})`;
+            alert("Profile updated successfully!");
+        }
+
+        function handleSavePreferences(e) {
+            e.preventDefault();
+            selectedCurrency = document.getElementById("setting-currency").value;
+            
+            renderCars(vehicles);
+            renderAdminFleet();
+            renderBookings();
+            alert(`Preferences saved! Currency set to ${selectedCurrency}`);
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            alert("Password updated successfully!");
+            e.target.reset();
+        }
+
+        function renderCars(data) {
+            const container = document.getElementById("car-list");
+            container.innerHTML = "";
+
+            if (data.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--gray);">No vehicles found matching criteria.</p>`;
+                return;
+            }
+
+            data.forEach(car => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <img src="${car.image}" alt="${car.name}" class="card-img">
+                    <div class="card-body">
+                        <h3 class="card-title">${car.name}</h3>
+                        <div class="card-specs">
+                            <span>${car.category}</span> • <span>5 Seats</span>
+                        </div>
+                        <div class="card-price">${selectedCurrency}${car.price} <span style="font-size:0.875rem; font-weight:normal; color:var(--gray);">/ day</span></div>
+                        <button class="btn" onclick="openBookingModal(${car.id})">Book Now</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterCars() {
+            const query = document.getElementById("search-input").value.toLowerCase();
+            const category = document.getElementById("category-filter").value;
+
+            const filtered = vehicles.filter(car => {
+                const matchesSearch = car.name.toLowerCase().includes(query);
+                const matchesCategory = category === "All" || car.category === category;
+                return matchesSearch && matchesCategory;
+            });
+
+            renderCars(filtered);
+        }
+
+        function setMinDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('start-date').min = today;
+            document.getElementById('end-date').min = today;
+        }
+
+        function openBookingModal(carId) {
+            const car = vehicles.find(v => v.id === carId);
+            if (!car) return;
+
+            document.getElementById("booking-car-id").value = car.id;
+            document.getElementById("modal-car-title").innerText = `Book ${car.name}`;
+            document.getElementById("summary-rate").innerText = `${selectedCurrency}${car.price}`;
+            
+            document.getElementById("start-date").value = "";
+            document.getElementById("end-date").value = "";
+            document.getElementById("summary-days").innerText = "0 days";
+            document.getElementById("summary-total").innerText = `${selectedCurrency}0`;
+
+            document.getElementById("booking-modal").style.display = "flex";
+        }
+
+        function calculatePrice() {
+            const carId = parseInt(document.getElementById("booking-car-id").value);
+            const car = vehicles.find(v => v.id === carId);
+            const startStr = document.getElementById("start-date").value;
+            const endStr = document.getElementById("end-date").value;
+
+            if (startStr && endStr && car) {
+                const start = new Date(startStr);
+                const end = new Date(endStr);
+                const diffTime = end - start;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0) {
+                    const total = diffDays * car.price;
+                    document.getElementById("summary-days").innerText = `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+                    document.getElementById("summary-total").innerText = `${selectedCurrency}${total}`;
+                    return;
+                }
+            }
+            document.getElementById("summary-days").innerText = "0 days";
+            document.getElementById("summary-total").innerText = `${selectedCurrency}0`;
+        }
+
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            const carId = parseInt(document.getElementById("booking-car-id").value);
+            const car = vehicles.find(v => v.id === carId);
+            const startStr = document.getElementById("start-date").value;
+            const endStr = document.getElementById("end-date").value;
+
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 0) {
+                alert("Return date must be after the pick-up date.");
+                return;
+            }
+
+            const totalCost = diffDays * car.price;
+            const newBooking = {
+                id: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+                userEmail: currentUser.email,
+                carName: car.name,
+                dates: `${startStr} to ${endStr}`,
+                total: totalCost,
+                currency: selectedCurrency,
+                status: "Confirmed"
+            };
+
+            bookings.unshift(newBooking);
+            closeModal('booking-modal');
+            renderBookings();
+            alert(`Booking Confirmed! Reference: ${newBooking.id}`);
+            switchView('bookings-view');
+        }
+
+        function renderBookings() {
+            const list = document.getElementById("bookings-list");
+            list.innerHTML = "";
+
+            const userBookings = currentUser.role === "Admin" 
+                ? bookings 
+                : bookings.filter(b => b.userEmail === currentUser.email);
+
+            if (userBookings.length === 0) {
+                list.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--gray);">No reservations found.</td></tr>`;
+                return;
+            }
+
+            userBookings.forEach(b => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><b>${b.id}</b></td>
+                    <td>${b.carName}</td>
+                    <td>${b.dates}</td>
+                    <td>${b.currency || selectedCurrency}${b.total}</td>
+                    <td><span class="badge ${b.status === 'Confirmed' ? 'badge-confirmed' : 'badge-cancelled'}">${b.status}</span></td>
+                    <td>
+                        ${b.status === 'Confirmed' ? `<button class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.8rem;" onclick="cancelBooking('${b.id}')">Cancel</button>` : '-'}
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+
+        function cancelBooking(id) {
+            const booking = bookings.find(b => b.id === id);
+            if (booking && confirm(`Are you sure you want to cancel booking ${id}?`)) {
+                booking.status = "Cancelled";
+                renderBookings();
+            }
+        }
+
+        function renderAdminFleet() {
+            const list = document.getElementById("admin-fleet-list");
+            list.innerHTML = "";
+
+            vehicles.forEach(car => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>#${car.id}</td>
+                    <td><b>${car.name}</b></td>
+                    <td>${car.category}</td>
+                    <td>${selectedCurrency}${car.price} / day</td>
+                    <td><span class="badge badge-available">${car.status}</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding:0.25rem 0.5rem; font-size:0.8rem;" onclick="removeVehicle(${car.id})">Remove</button>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+
+        function openAddCarModal() {
+            document.getElementById("car-form").reset();
+            document.getElementById("car-modal").style.display = "flex";
+        }
+
+        function handleAddCarSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById("car-name").value;
+            const category = document.getElementById("car-category").value;
+            const price = parseFloat(document.getElementById("car-price").value);
+            const image = document.getElementById("car-image").value;
+
+            const newCar = {
+                id: vehicles.length > 0 ? Math.max(...vehicles.map(v => v.id)) + 1 : 1,
+                name,
+                category,
+                price,
+                image,
+                status: "Available"
+            };
+
+            vehicles.push(newCar);
+            renderCars(vehicles);
+            renderAdminFleet();
+            closeModal('car-modal');
+            alert(`${name} has been successfully added to the fleet.`);
+        }
+
+        function removeVehicle(id) {
+            if (confirm("Are you sure you want to remove this vehicle from the fleet?")) {
+                vehicles = vehicles.filter(v => v.id !== id);
+                renderCars(vehicles);
+                renderAdminFleet();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+    </script>
+</body>
+</html>
